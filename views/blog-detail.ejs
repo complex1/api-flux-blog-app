@@ -1,0 +1,139 @@
+<!-- Blog Post -->
+<article class="card mb-4">
+  <div class="card-body">
+    <h1 class="card-title" style="font-size: var(--font-size-xlarge); margin-bottom: var(--spacing-medium);">
+      <%= blog.title %>
+    </h1>
+    
+    <div class="blog-meta mb-3">
+      <span class="blog-author">By <%= blog.author_username %></span>
+      <% if (blog.author_full_name) { %>
+        <span>(<%= blog.author_full_name %>)</span>
+      <% } %>
+      <span>•</span>
+      <span class="blog-date"><%= new Date(blog.created_at).toLocaleDateString() %></span>
+      <% if (blog.updated_at !== blog.created_at) { %>
+        <span>•</span>
+        <span class="blog-date">Updated <%= new Date(blog.updated_at).toLocaleDateString() %></span>
+      <% } %>
+      <% if (blog.tags) { %>
+        <span>•</span>
+        <span style="color: var(--color-text-secondary);">Tags: <%= blog.tags %></span>
+      <% } %>
+    </div>
+    
+    <% if (blog.excerpt) { %>
+      <div class="blog-excerpt mb-3">
+        <%= blog.excerpt %>
+      </div>
+      <hr>
+    <% } %>
+    
+    <div class="blog-content" style="line-height: var(--line-height-large); margin-bottom: var(--spacing-large);">
+      <%- blog.content.replace(/\n/g, '<br>') %>
+    </div>
+    
+    <div class="blog-actions">
+      <button class="like-btn <%= blog.is_liked ? 'liked' : '' %>" data-blog-id="<%= blog.id %>">
+        ❤️ <span class="like-count"><%= blog.likes_count %></span> likes
+      </button>
+      <span style="color: var(--color-text-secondary);">
+        💬 <%= blog.comments_count %> comments
+      </span>
+    </div>
+  </div>
+</article>
+
+<!-- Add Comment Section -->
+<div class="card mb-4" data-auth-required style="display: none;">
+  <div class="card-header">
+    <h3 class="card-title mb-0">Add a Comment</h3>
+  </div>
+  <div class="card-body">
+    <form class="comment-form" data-blog-id="<%= blog.id %>">
+      <div class="form-group">
+        <textarea 
+          name="content" 
+          class="form-control" 
+          rows="3" 
+          placeholder="Share your thoughts..." 
+          required
+        ></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
+  </div>
+</div>
+
+<!-- Login Prompt for Comments -->
+<div class="card mb-4" data-no-auth>
+  <div class="card-body text-center">
+    <p class="card-text">Want to comment? Please login or create an account.</p>
+    <div class="d-flex justify-content-center gap-2">
+      <a href="/login" class="btn btn-primary">Login</a>
+      <a href="/register" class="btn btn-outline">Register</a>
+    </div>
+  </div>
+</div>
+
+<!-- Comments Section -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title mb-0">
+      Comments (<%= comments && comments.data ? comments.data.length : 0 %>)
+    </h3>
+  </div>
+  <div class="card-body">
+    <% if (comments && comments.data && comments.data.length > 0) { %>
+      <% comments.data.forEach((comment, index) => { %>
+        <div class="comment" style="padding: var(--spacing-medium) 0;">
+          <div class="comment-meta" style="margin-bottom: var(--spacing-small);">
+            <strong style="color: var(--color-primary);"><%= comment.username %></strong>
+            <% if (comment.full_name) { %>
+              <span style="color: var(--color-text-secondary);">(<%= comment.full_name %>)</span>
+            <% } %>
+            <span style="color: var(--color-text-secondary);">•</span>
+            <span style="color: var(--color-text-secondary); font-size: var(--font-size-small);">
+              <%= new Date(comment.created_at).toLocaleDateString() %>
+            </span>
+          </div>
+          <div class="comment-content" style="color: var(--color-text-primary);">
+            <%= comment.content %>
+          </div>
+        </div>
+        
+        <% if (index < comments.data.length - 1) { %>
+          <hr>
+        <% } %>
+      <% }) %>
+      
+      <!-- Comment Pagination -->
+      <% if (comments.pagination && comments.pagination.totalPages > 1) { %>
+        <hr>
+        <nav class="d-flex justify-content-center gap-2 mt-3">
+          <% if (comments.pagination.page > 1) { %>
+            <a href="/blogs/<%= blog.id %>?comment_page=<%= comments.pagination.page - 1 %>" class="btn btn-sm btn-outline">← Previous</a>
+          <% } %>
+          
+          <span class="btn btn-sm btn-outline" style="pointer-events: none;">
+            Page <%= comments.pagination.page %> of <%= comments.pagination.totalPages %>
+          </span>
+          
+          <% if (comments.pagination.page < comments.pagination.totalPages) { %>
+            <a href="/blogs/<%= blog.id %>?comment_page=<%= comments.pagination.page + 1 %>" class="btn btn-sm btn-outline">Next →</a>
+          <% } %>
+        </nav>
+      <% } %>
+      
+    <% } else { %>
+      <div class="text-center">
+        <p style="color: var(--color-text-secondary);">No comments yet. Be the first to comment!</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Back to Blogs -->
+<div class="text-center mt-4">
+  <a href="/blogs" class="btn btn-outline">← Back to All Blogs</a>
+</div>

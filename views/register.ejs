@@ -1,0 +1,97 @@
+<div class="d-flex justify-content-center">
+  <div class="card" style="width: 100%; max-width: 400px;">
+    <div class="card-header">
+      <h2 class="card-title text-center mb-0">Create Account</h2>
+    </div>
+    <div class="card-body">
+      <form id="register-form">
+        <div class="form-group">
+          <label for="username" class="form-label">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            class="form-control" 
+            required
+            placeholder="Choose a username"
+            minlength="3"
+            maxlength="50"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="form-control" 
+            required
+            placeholder="Enter your email"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="full_name" class="form-label">Full Name (Optional)</label>
+          <input 
+            type="text" 
+            id="full_name" 
+            name="full_name" 
+            class="form-control" 
+            placeholder="Enter your full name"
+            maxlength="100"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-control" 
+            required
+            placeholder="Create a password"
+            minlength="6"
+          >
+          <small class="form-text" style="color: var(--color-text-secondary); font-size: var(--font-size-small);">
+            Password must be at least 6 characters long
+          </small>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Create Account
+        </button>
+      </form>
+      
+      <hr>
+      
+      <div class="text-center">
+        <p class="mb-0">Already have an account?</p>
+        <a href="/api-flux-blog/login" class="btn btn-outline" style="width: 100%; margin-top: var(--spacing-small);">
+          Login
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if already logged in and show a message
+  const token = localStorage.getItem('token');
+  if (token) {
+    const alertContainer = document.getElementById('alert-container');
+    if (alertContainer) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-info';
+      alert.innerHTML = `
+        <strong>You are already logged in!</strong> 
+        <a href="/api-flux-blog/dashboard" class="btn btn-sm btn-primary" style="margin-left: 10px;">Go to Dashboard</a>
+        <button onclick="logout(); location.reload();" class="btn btn-sm btn-outline" style="margin-left: 5px;">Logout and Register New Account</button>
+      `;
+      alertContainer.appendChild(alert);
+    }
+  }
+});
+</script>

@@ -1,0 +1,326 @@
+<!-- Loading State -->
+<div id="loading" class="text-center p-4">
+  <p>Loading blog post...</p>
+</div>
+
+    <!-- Error State -->
+    <div id="error-state" class="d-none">
+      <div class="alert alert-danger">
+        <strong>Error:</strong> <span id="error-message">Failed to load blog post</span>
+      </div>
+      <a href="/api-flux-blog/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+
+    <!-- Edit Form -->
+    <div id="edit-form" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit Blog Post</h1>
+        <a href="/api-flux-blog/dashboard" class="btn btn-outline">← Back to Dashboard</a>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form id="editBlogForm">
+            <div class="form-group">
+              <label for="title" class="form-label">Title *</label>
+              <input 
+                type="text" 
+                id="title" 
+                name="title" 
+                class="form-control" 
+                required
+                maxlength="200"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="excerpt" class="form-label">Excerpt</label>
+              <textarea 
+                id="excerpt" 
+                name="excerpt" 
+                class="form-control" 
+                rows="3"
+                maxlength="500"
+                placeholder="Brief description of your blog post (optional)"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="content" class="form-label">Content *</label>
+              <textarea 
+                id="content" 
+                name="content" 
+                class="form-control" 
+                rows="15" 
+                required
+                placeholder="Write your blog content here..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="tags" class="form-label">Tags</label>
+              <input 
+                type="text" 
+                id="tags" 
+                name="tags" 
+                class="form-control" 
+                placeholder="technology, javascript, coding (comma-separated)"
+                maxlength="200"
+              >
+              <small class="text-muted">Separate tags with commas</small>
+            </div>
+
+            <div class="form-group">
+              <div class="d-flex align-items-center gap-2">
+                <input 
+                  type="checkbox" 
+                  id="is_published" 
+                  name="is_published"
+                >
+                <label for="is_published" class="form-label mb-0">Publish this blog post</label>
+              </div>
+              <small class="text-muted">Uncheck to save as draft</small>
+            </div>
+
+            <!-- Form Messages -->
+            <div id="form-success" class="alert alert-success d-none">
+              Blog post updated successfully!
+            </div>
+
+            <div id="form-error" class="alert alert-danger d-none">
+              <span id="form-error-message">Failed to update blog post</span>
+            </div>
+
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary" id="updateBtn">
+                Update Blog Post
+              </button>
+              <button type="button" class="btn btn-outline" id="previewBtn">
+                Preview
+              </button>
+              <button type="button" class="btn btn-danger" id="deleteBtn">
+                Delete Post
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="d-none">
+      <div class="mask show"></div>
+      <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; z-index: 101;">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>Preview</h3>
+            <button type="button" class="btn btn-outline btn-sm" id="closePreview">Close</button>
+          </div>
+          <div class="card-body">
+            <div id="previewContent">
+              <h1 id="previewTitle"></h1>
+              <div class="blog-meta mb-3">
+                <span class="blog-author">By You</span>
+                <span>•</span>
+                <span class="blog-date">Now</span>
+                <span>•</span>
+                <span id="previewStatus"></span>
+              </div>
+              <div id="previewExcerpt" class="blog-excerpt"></div>
+              <hr>
+              <div id="previewBody"></div>
+              <div class="mt-3">
+                <strong>Tags:</strong> <span id="previewTags"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const blogId = '<%= blogId %>';
+  const loadingEl = document.getElementById('loading');
+  const errorStateEl = document.getElementById('error-state');
+  const editFormEl = document.getElementById('edit-form');
+  const form = document.getElementById('editBlogForm');
+  const updateBtn = document.getElementById('updateBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const previewBtn = document.getElementById('previewBtn');
+  const previewModal = document.getElementById('previewModal');
+  const closePreviewBtn = document.getElementById('closePreview');
+
+  // Form fields
+  const titleField = document.getElementById('title');
+  const excerptField = document.getElementById('excerpt');
+  const contentField = document.getElementById('content');
+  const tagsField = document.getElementById('tags');
+  const publishedField = document.getElementById('is_published');
+
+  // Load blog data
+  async function loadBlog() {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const response = await fetch(`/api-flux-api/blogs/${blogId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load blog post');
+      }
+
+      const result = await response.json();
+      const blog = result.data;
+
+      // Populate form
+      titleField.value = blog.title;
+      excerptField.value = blog.excerpt || '';
+      contentField.value = blog.content;
+      tagsField.value = blog.tags || '';
+      publishedField.checked = blog.is_published;
+
+      // Show form
+      loadingEl.classList.add('d-none');
+      editFormEl.classList.remove('d-none');
+
+    } catch (error) {
+      console.error('Error loading blog:', error);
+      document.getElementById('error-message').textContent = error.message;
+      loadingEl.classList.add('d-none');
+      errorStateEl.classList.remove('d-none');
+    }
+  }
+
+  // Update blog
+  async function updateBlog(e) {
+    e.preventDefault();
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+
+    updateBtn.disabled = true;
+    updateBtn.textContent = 'Updating...';
+
+    const formData = new FormData(form);
+    const blogData = {
+      title: formData.get('title'),
+      excerpt: formData.get('excerpt'),
+      content: formData.get('content'),
+      tags: formData.get('tags'),
+      is_published: publishedField.checked
+    };
+
+    try {
+      const response = await fetch(`/api-flux-api/blogs/${blogId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(blogData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        document.getElementById('form-success').classList.remove('d-none');
+        document.getElementById('form-error').classList.add('d-none');
+        
+        // Redirect to dashboard after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 2000);
+      } else {
+        throw new Error(result.message || 'Failed to update blog post');
+      }
+    } catch (error) {
+      console.error('Error updating blog:', error);
+      document.getElementById('form-error-message').textContent = error.message;
+      document.getElementById('form-error').classList.remove('d-none');
+      document.getElementById('form-success').classList.add('d-none');
+    } finally {
+      updateBtn.disabled = false;
+      updateBtn.textContent = 'Update Blog Post';
+    }
+  }
+
+  // Delete blog
+  async function deleteBlog() {
+    if (!confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = 'Deleting...';
+
+    try {
+      const response = await fetch(`/api-flux-api/blogs/${blogId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        alert('Blog post deleted successfully!');
+        window.location.href = '/dashboard';
+      } else {
+        const result = await response.json();
+        throw new Error(result.message || 'Failed to delete blog post');
+      }
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = 'Delete Post';
+    }
+  }
+
+  // Preview functionality
+  function showPreview() {
+    document.getElementById('previewTitle').textContent = titleField.value || 'Untitled';
+    document.getElementById('previewExcerpt').textContent = excerptField.value || '';
+    document.getElementById('previewBody').innerHTML = contentField.value.replace(/\n/g, '<br>');
+    document.getElementById('previewTags').textContent = tagsField.value || 'No tags';
+    document.getElementById('previewStatus').textContent = publishedField.checked ? 'Published' : 'Draft';
+    
+    previewModal.classList.remove('d-none');
+  }
+
+  function hidePreview() {
+    previewModal.classList.add('d-none');
+  }
+
+  // Event listeners
+  form.addEventListener('submit', updateBlog);
+  deleteBtn.addEventListener('click', deleteBlog);
+  previewBtn.addEventListener('click', showPreview);
+  closePreviewBtn.addEventListener('click', hidePreview);
+  
+  // Close preview when clicking mask
+  previewModal.querySelector('.mask').addEventListener('click', hidePreview);
+
+  // Load blog data on page load
+  loadBlog();
+});
+</script>

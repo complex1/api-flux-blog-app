@@ -1,0 +1,35 @@
+<div class="text-center">
+  <div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-body p-4">
+      <h1 class="mb-3" style="font-size: 4rem; color: var(--color-danger);">😵</h1>
+      <h2 class="card-title mb-3">Oops! Something went wrong</h2>
+      <p class="card-text mb-4" style="font-size: var(--font-size-large);">
+        <%= message || 'An unexpected error occurred. Please try again later.' %>
+      </p>
+      
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="/api-flux-blog/" class="btn btn-primary">
+          🏠 Go Home
+        </a>
+        <a href="/api-flux-blog/blogs" class="btn btn-outline">
+          📖 Browse Blogs
+        </a>
+        <button onclick="history.back()" class="btn btn-secondary">
+          ← Go Back
+        </button>
+      </div>
+      
+      <hr class="my-4">
+      
+      <div class="text-left" style="font-size: var(--font-size-small); color: var(--color-text-secondary);">
+        <p><strong>If this problem persists, you can:</strong></p>
+        <ul style="text-align: left; display: inline-block;">
+          <li>Refresh the page</li>
+          <li>Clear your browser cache</li>
+          <li>Check your internet connection</li>
+          <li>Try again in a few minutes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

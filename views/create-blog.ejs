@@ -1,0 +1,133 @@
+<div class="card">
+  <div class="card-header">
+    <h1 class="card-title mb-0">Write a New Blog Post</h1>
+  </div>
+  <div class="card-body">
+    <form id="create-blog-form">
+      <div class="form-group">
+        <label for="title" class="form-label">Title</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          class="form-control" 
+          required
+          placeholder="Enter your blog title"
+          maxlength="255"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="excerpt" class="form-label">Excerpt (Optional)</label>
+        <textarea 
+          id="excerpt" 
+          name="excerpt" 
+          class="form-control" 
+          rows="2"
+          placeholder="A brief summary of your blog post"
+          maxlength="500"
+        ></textarea>
+        <small class="form-text" style="color: var(--color-text-secondary); font-size: var(--font-size-small);">
+          This will be shown as a preview on the blog listing
+        </small>
+      </div>
+      
+      <div class="form-group">
+        <label for="content" class="form-label">Content</label>
+        <textarea 
+          id="content" 
+          name="content" 
+          class="form-control" 
+          rows="12"
+          required
+          placeholder="Write your blog content here..."
+        ></textarea>
+      </div>
+      
+      <div class="form-group">
+        <div class="d-flex align-items-center gap-2">
+          <input 
+            type="checkbox" 
+            id="is_published" 
+            name="is_published" 
+            checked
+          >
+          <label for="is_published" class="form-label mb-0">Publish immediately</label>
+        </div>
+        <small class="form-text" style="color: var(--color-text-secondary); font-size: var(--font-size-small);">
+          Uncheck to save as draft
+        </small>
+      </div>
+      
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <span class="publish-text">Publish Blog</span>
+          <span class="draft-text" style="display: none;">Save as Draft</span>
+        </button>
+        <a href="/api-flux-blog/dashboard" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Redirect if not logged in
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/api-flux-blog/login';
+    return;
+  }
+  
+  const form = document.getElementById('create-blog-form');
+  const publishCheckbox = document.getElementById('is_published');
+  const publishText = document.querySelector('.publish-text');
+  const draftText = document.querySelector('.draft-text');
+  
+  // Update button text based on publish checkbox
+  publishCheckbox.addEventListener('change', () => {
+    if (publishCheckbox.checked) {
+      publishText.style.display = 'inline';
+      draftText.style.display = 'none';
+    } else {
+      publishText.style.display = 'none';
+      draftText.style.display = 'inline';
+    }
+  });
+  
+  // Form submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    const data = {
+      title: formData.get('title'),
+      content: formData.get('content'),
+      excerpt: formData.get('excerpt') || null,
+      is_published: formData.has('is_published')
+    };
+    
+    try {
+      const response = await fetch('/api-flux-api/blogs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        window.location.href = `/blogs/${result.data.id}`;
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Error creating blog:', error);
+      alert('Error creating blog');
+    }
+  });
+});
+</script>

@@ -1,0 +1,90 @@
+<!-- Page Header -->
+<div class="card mb-4">
+  <div class="card-body text-center">
+    <h1 class="card-title">All Blog Posts</h1>
+    <p class="card-text">Discover amazing content from our community of writers</p>
+  </div>
+</div>
+
+<!-- Blogs List -->
+<% if (blogs && blogs.data && blogs.data.length > 0) { %>
+  <% blogs.data.forEach(blog => { %>
+    <article class="card blog-post">
+      <div class="card-body">
+        <h2 class="card-title">
+          <a href="/blogs/<%= blog.id %>" style="text-decoration: none; color: inherit;">
+            <%= blog.title %>
+          </a>
+        </h2>
+        
+        <div class="blog-meta">
+          <span class="blog-author">By <%= blog.author_username %></span>
+          <% if (blog.author_full_name) { %>
+            <span>(<%= blog.author_full_name %>)</span>
+          <% } %>
+          <span>•</span>
+          <span class="blog-date"><%= new Date(blog.created_at).toLocaleDateString() %></span>
+          <span>•</span>
+          <span>❤️ <%= blog.likes_count %> likes</span>
+          <span>•</span>
+          <span>💬 <%= blog.comments_count %> comments</span>
+        </div>
+        
+        <% if (blog.excerpt) { %>
+          <p class="blog-excerpt"><%= blog.excerpt %></p>
+        <% } else { %>
+          <p class="blog-excerpt">
+            <%= blog.content.substring(0, 200) %>
+            <% if (blog.content.length > 200) { %>...
+            <% } %>
+          </p>
+        <% } %>
+        
+        <div class="blog-actions">
+          <a href="/blogs/<%= blog.id %>" class="btn btn-primary">Read More</a>
+          <button class="like-btn <%= blog.is_liked ? 'liked' : '' %>" data-blog-id="<%= blog.id %>">
+            ❤️ <span class="like-count"><%= blog.likes_count %></span>
+          </button>
+        </div>
+      </div>
+    </article>
+  <% }) %>
+  
+  <!-- Pagination -->
+  <% if (blogs.pagination && blogs.pagination.totalPages > 1) { %>
+    <div class="card">
+      <div class="card-body">
+        <nav class="d-flex justify-content-center gap-2">
+          <% if (blogs.pagination.page > 1) { %>
+            <a href="/blogs?page=<%= blogs.pagination.page - 1 %>" class="btn btn-outline">← Previous</a>
+          <% } %>
+          
+          <span class="btn btn-outline" style="pointer-events: none;">
+            Page <%= blogs.pagination.page %> of <%= blogs.pagination.totalPages %>
+          </span>
+          
+          <% if (blogs.pagination.page < blogs.pagination.totalPages) { %>
+            <a href="/blogs?page=<%= blogs.pagination.page + 1 %>" class="btn btn-outline">Next →</a>
+          <% } %>
+        </nav>
+        
+        <div class="text-center mt-2">
+          <small style="color: var(--color-text-secondary);">
+            Showing <%= blogs.data.length %> of <%= blogs.pagination.total %> posts
+          </small>
+        </div>
+      </div>
+    </div>
+  <% } %>
+  
+<% } else { %>
+  <!-- Empty State -->
+  <div class="card">
+    <div class="card-body text-center">
+      <h3 class="card-title">No Blog Posts Yet</h3>
+      <p class="card-text">Be the first to share your thoughts with the community!</p>
+      <a href="/register" class="btn btn-primary" data-no-auth>Get Started</a>
+      <a href="/create-blog" class="btn btn-primary" data-auth-required style="display: none;">Write Your First Blog</a>
+    </div>
+  </div>
+<% } %>

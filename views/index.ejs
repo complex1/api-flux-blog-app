@@ -1,0 +1,222 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <h1 class="animate-fade-in">
+        <i class="fas fa-rocket animate-float"></i>
+        Welcome to Modern Blog
+      </h1>
+      <p class="animate-fade-in">
+        Discover amazing stories, share your thoughts, and connect with a community of passionate writers and readers.
+      </p>
+      <div class="d-flex gap-md justify-content-center flex-wrap animate-fade-in">
+        <a href="/api-flux-blog/blogs" class="btn btn-lg btn-primary hover-lift">
+          <i class="fas fa-book-open"></i>
+          Explore Blogs
+        </a>
+        <a href="/api-flux-blog/register" class="btn btn-lg btn-outline hover-lift" data-no-auth>
+          <i class="fas fa-user-plus"></i>
+          Join Community
+        </a>
+        <a href="/api-flux-blog/create-blog" class="btn btn-lg btn-outline hover-lift" data-auth-required style="display: none;">
+          <i class="fas fa-pen"></i>
+          Write a Blog
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section style="padding: var(--spacing-3xl) 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); margin-bottom: var(--spacing-lg);">
+        <i class="fas fa-star"></i>
+        Why Choose Our Platform?
+      </h2>
+      <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); max-width: 600px; margin: 0 auto;">
+        Built with modern technologies and designed for the best user experience.
+      </p>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-xl); margin-top: var(--spacing-2xl);">
+      <!-- Feature 1 -->
+      <div class="card hover-lift animate-fade-in" style="text-align: center;">
+        <div class="card-body">
+          <div style="font-size: var(--font-size-3xl); color: var(--color-primary); margin-bottom: var(--spacing-lg);">
+            <i class="fas fa-pen-fancy animate-bounce"></i>
+          </div>
+          <h3 class="card-title">Write & Share</h3>
+          <p class="card-text">
+            Create beautiful blog posts with our intuitive editor. Share your thoughts and stories with the world.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Feature 2 -->
+      <div class="card hover-lift animate-fade-in" style="text-align: center; animation-delay: 0.2s;">
+        <div class="card-body">
+          <div style="font-size: var(--font-size-3xl); color: var(--color-success); margin-bottom: var(--spacing-lg);">
+            <i class="fas fa-heart animate-pulse"></i>
+          </div>
+          <h3 class="card-title">Engage</h3>
+          <p class="card-text">
+            Like and comment on posts from other writers. Build connections and engage in meaningful discussions.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Feature 3 -->
+      <div class="card hover-lift animate-fade-in" style="text-align: center; animation-delay: 0.4s;">
+        <div class="card-body">
+          <div style="font-size: var(--font-size-3xl); color: var(--color-accent); margin-bottom: var(--spacing-lg);">
+            <i class="fas fa-mobile-alt animate-float"></i>
+          </div>
+          <h3 class="card-title">Responsive</h3>
+          <p class="card-text">
+            Enjoy a beautiful, modern interface that works perfectly on all devices - desktop, tablet, and mobile.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Blogs Preview -->
+<section style="padding: var(--spacing-2xl) 0; background: var(--color-background-secondary);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-md);">
+        <i class="fas fa-fire"></i>
+        Latest Blog Posts
+      </h2>
+      <p style="color: var(--color-text-secondary);">
+        Discover the most recent stories from our community
+      </p>
+    </div>
+    
+    <% if (blogs && blogs.length > 0) { %>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--spacing-xl);">
+        <% blogs.forEach((blog, index) => { %>
+          <div class="card hover-lift animate-fade-in" style="animation-delay: <%= index * 0.1 %>s;">
+            <div class="card-body">
+              <div class="blog-meta">
+                <span class="blog-author">
+                  <i class="fas fa-user"></i>
+                  <%= blog.author_username %>
+                </span>
+                <span class="blog-date">
+                  <i class="fas fa-calendar"></i>
+                  <%= new Date(blog.created_at).toLocaleDateString() %>
+                </span>
+                <span>
+                  <i class="fas fa-heart"></i>
+                  <%= blog.likes_count || 0 %>
+                </span>
+                <span>
+                  <i class="fas fa-comment"></i>
+                  <%= blog.comments_count || 0 %>
+                </span>
+              </div>
+              <h3 class="card-title">
+                <a href="/api-flux-blog/blogs/<%= blog.id %>" style="text-decoration: none; color: inherit;">
+                  <%= blog.title %>
+                </a>
+              </h3>
+              <% if (blog.excerpt) { %>
+                <p class="card-text blog-excerpt"><%= blog.excerpt %></p>
+              <% } %>
+              <div class="blog-actions">
+                <a href="/api-flux-blog/blogs/<%= blog.id %>" class="btn btn-primary btn-sm">
+                  <i class="fas fa-book-open"></i>
+                  Read More
+                </a>
+                <button class="like-btn <%= blog.is_liked ? 'liked' : '' %>" data-blog-id="<%= blog.id %>">
+                  <i class="fas fa-heart"></i>
+                  <span class="like-count"><%= blog.likes_count || 0 %></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center" style="padding: var(--spacing-2xl);">
+        <i class="fas fa-feather" style="font-size: var(--font-size-3xl); color: var(--color-text-secondary); margin-bottom: var(--spacing-md);"></i>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">No blog posts yet. Be the first to share your story!</p>
+        <a href="/api-flux-blog/register" class="btn btn-primary" data-no-auth>
+          <i class="fas fa-user-plus"></i>
+          Get Started
+        </a>
+        <a href="/api-flux-blog/create-blog" class="btn btn-primary" data-auth-required style="display: none;">
+          <i class="fas fa-pen"></i>
+          Write Your First Blog
+        </a>
+      </div>
+    <% } %>
+    
+    <div class="text-center mt-5">
+      <a href="/api-flux-blog/blogs" class="btn btn-primary hover-lift">
+        <i class="fas fa-arrow-right"></i>
+        View All Blogs
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section style="padding: var(--spacing-3xl) 0;">
+  <div class="container">
+    <div class="card hover-glow" style="background: var(--gradient-primary); color: var(--color-text-inverse); text-align: center; border: none;">
+      <div class="card-body" style="padding: var(--spacing-2xl);">
+        <h2 style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); margin-bottom: var(--spacing-lg);">
+          <i class="fas fa-pen-fancy"></i>
+          Ready to Share Your Story?
+        </h2>
+        <p style="font-size: var(--font-size-lg); opacity: 0.9; margin-bottom: var(--spacing-xl); max-width: 500px; margin-left: auto; margin-right: auto;">
+          Join thousands of writers who are sharing their thoughts, experiences, and expertise with the world.
+        </p>
+        <div class="d-flex gap-md justify-content-center flex-wrap">
+          <a href="/api-flux-blog/register" class="btn btn-lg" style="background: rgba(255, 255, 255, 0.2); color: var(--color-text-inverse); border: 2px solid rgba(255, 255, 255, 0.3);" data-no-auth>
+            <i class="fas fa-user-plus"></i>
+            Get Started Free
+          </a>
+          <a href="/api-flux-blog/create-blog" class="btn btn-lg" style="background: rgba(255, 255, 255, 0.2); color: var(--color-text-inverse); border: 2px solid rgba(255, 255, 255, 0.3);" data-auth-required>
+            <i class="fas fa-pen"></i>
+            Write Now
+          </a>
+          <a href="/api-flux-blog/blogs" class="btn btn-lg btn-outline" style="border-color: rgba(255, 255, 255, 0.3); color: var(--color-text-inverse);">
+            <i class="fas fa-eye"></i>
+            Browse Posts
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Add scroll animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate-fade-in');
+    }
+  });
+}, observerOptions);
+
+// Observe all cards for animation
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.card').forEach(card => {
+      observer.observe(card);
+    });
+  }, 100);
+});
+</script>

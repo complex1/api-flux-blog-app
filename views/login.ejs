@@ -1,0 +1,215 @@
+<div class="container" style="max-width: 500px; margin: var(--spacing-3xl) auto;">
+  <div class="card hover-glow animate-fade-in">
+    <div class="card-body" style="padding: var(--spacing-2xl);">
+      <div class="text-center mb-4">
+        <div style="font-size: var(--font-size-3xl); color: var(--color-primary); margin-bottom: var(--spacing-lg);">
+          <i class="fas fa-sign-in-alt animate-bounce"></i>
+        </div>
+        <h1 style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); margin-bottom: var(--spacing-sm);">
+          Welcome Back
+        </h1>
+        <p style="color: var(--color-text-secondary);">
+          Sign in to your account to continue your blogging journey
+        </p>
+      </div>
+
+      <div id="auth-status" class="mb-4" style="display: none;">
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i>
+          You're already logged in! Would you like to go to your dashboard instead?
+          <div style="margin-top: var(--spacing-md);">
+            <a href="/api-flux-blog/dashboard" class="btn btn-primary btn-sm">
+              <i class="fas fa-tachometer-alt"></i>
+              Go to Dashboard
+            </a>
+            <button onclick="logout(); location.reload();" class="btn btn-outline btn-sm" style="margin-left: var(--spacing-sm);">
+              <i class="fas fa-sign-out-alt"></i>
+              Logout & Login as Different User
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email" class="form-label">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="form-control" 
+            placeholder="Enter your email address"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <div style="position: relative;">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="form-control" 
+              placeholder="Enter your password"
+              required
+            >
+            <button 
+              type="button" 
+              onclick="togglePassword()" 
+              style="position: absolute; right: var(--spacing-md); top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-secondary); cursor: pointer;"
+            >
+              <i id="password-toggle-icon" class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: var(--spacing-lg);">
+          <i class="fas fa-sign-in-alt"></i>
+          Sign In
+        </button>
+      </form>
+
+      <div class="text-center">
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">
+          Don't have an account?
+        </p>
+        <a href="/api-flux-blog/register" class="btn btn-outline">
+          <i class="fas fa-user-plus"></i>
+          Create Account
+        </a>
+      </div>
+
+      <!-- Social Login (placeholder for future implementation) -->
+      <div style="margin-top: var(--spacing-xl); text-align: center;">
+        <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+          Or continue with
+        </p>
+        <div class="d-flex gap-sm justify-content-center">
+          <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.5;">
+            <i class="fab fa-google"></i>
+            Google
+          </button>
+          <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.5;">
+            <i class="fab fa-github"></i>
+            GitHub
+          </button>
+        </div>
+        <p style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-sm);">
+          Social login coming soon
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Toggle password visibility
+function togglePassword() {
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('password-toggle-icon');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleIcon.className = 'fas fa-eye-slash';
+  } else {
+    passwordInput.type = 'password';
+    toggleIcon.className = 'fas fa-eye';
+  }
+}
+
+// Add loading state to button
+function setLoading(loading) {
+  const submitBtn = document.querySelector('#login-form button[type="submit"]');
+  if (loading) {
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+    submitBtn.disabled = true;
+  } else {
+    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+    submitBtn.disabled = false;
+  }
+}
+
+// Enhanced form handling with better UX
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  
+  // Clear previous errors
+  document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+  document.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-invalid'));
+  
+  setLoading(true);
+  
+  try {
+    const response = await fetch('/api-flux-api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      localStorage.setItem('token', data.data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      
+      // Show success message with animation
+      showAlert('success', 'Login successful! Redirecting to dashboard...', 'fas fa-check-circle');
+      
+      // Redirect after short delay
+      setTimeout(() => {
+        window.location.href = '/api-flux-blog/dashboard';
+      }, 1500);
+    } else {
+      setLoading(false);
+      showAlert('danger', data.message || 'Login failed. Please try again.', 'fas fa-exclamation-triangle');
+      
+      // Highlight relevant fields
+      if (data.message.toLowerCase().includes('email') || data.message.toLowerCase().includes('password')) {
+        document.getElementById('email').classList.add('is-invalid');
+        document.getElementById('password').classList.add('is-invalid');
+      }
+    }
+  } catch (error) {
+    setLoading(false);
+    console.error('Login error:', error);
+    showAlert('danger', 'Network error. Please check your connection and try again.', 'fas fa-wifi');
+  }
+});
+
+// Check if user is already logged in
+document.addEventListener('DOMContentLoaded', function() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  
+  if (token && user) {
+    document.getElementById('auth-status').style.display = 'block';
+  }
+});
+
+// Add input animations
+document.querySelectorAll('.form-control').forEach(input => {
+  input.addEventListener('focus', function() {
+    this.style.transform = 'translateY(-2px)';
+    this.style.boxShadow = 'var(--shadow-glow)';
+  });
+  
+  input.addEventListener('blur', function() {
+    this.style.transform = 'translateY(0)';
+    if (!this.matches(':focus')) {
+      this.style.boxShadow = '';
+    }
+  });
+});
+</script>
